@@ -1,0 +1,270 @@
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <title>Chain Reaction</title>
+</head>
+<script>
+    let rowsAndColumns = 10
+    let gameOver = false
+    let players = ["red", "green"]
+    let playerCells = {}
+    let turn = 0
+    let occupiedCells = 0
+    let values = {}
+    let cellOwner = {}
+    let maxCapacity = {}
+    maxCapacity["00"] = 2
+    maxCapacity["09"] = 2
+    maxCapacity["90"] = 2
+    maxCapacity["99"] = 2
+    function reset() {
+        window.location.reload();
+    }
+
+    function increaseCount(i, j) {
+        //up
+        if (i - 1 > -1) {
+            let loc = String(i - 1) + String(j)
+            let locCell = document.getElementById(loc);
+            if (values[loc]) {
+                values[loc]++;
+                if (values[loc] > maxCapacity[loc]) {
+                    values[loc] = 0;
+                    occupiedCells--;
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = undefined;
+                    locCell.replaceChildren();
+                    increaseCount(i - 1, j)
+                } else {
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = players[turn];
+                    playerCells[cellOwner[loc]]++;
+                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
+                }
+            } else {
+                playerCells[players[turn]]++;
+                occupiedCells++;
+                values[loc] = 1
+                make1(locCell);
+            }
+        }
+        //down
+        if (i + 1 < rowsAndColumns) {
+            let loc = String(i + 1) + String(j)
+            let locCell = document.getElementById(loc);
+            if (values[loc]) {
+                values[loc]++;
+                if (values[loc] > maxCapacity[loc]) {
+                    values[loc] = 0;
+                    occupiedCells--;
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = undefined;
+                    locCell.replaceChildren();
+                    increaseCount(i + 1, j)
+                } else {
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = players[turn];
+                    playerCells[cellOwner[loc]]++;
+                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
+                }
+            } else {
+                playerCells[players[turn]]++;
+                occupiedCells++;
+                values[loc] = 1;
+                make1(locCell);
+            }
+        }
+        //left
+        if (j - 1 > -1) {
+            let loc = String(i) + String(j - 1)
+            let locCell = document.getElementById(loc);
+            if (values[loc]) {
+                values[loc]++;
+                if (values[loc] > maxCapacity[loc]) {
+                    values[loc] = 0;
+                    occupiedCells--;
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = undefined;
+                    locCell.replaceChildren();
+                    increaseCount(i, j - 1)
+                } else {
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = players[turn];
+                    playerCells[cellOwner[loc]]++;
+                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
+                }
+            } else {
+                playerCells[players[turn]]++;
+                occupiedCells++;
+                values[loc] = 1;
+                make1(locCell);
+            }
+        }
+        //right
+        if (j + 1 < rowsAndColumns) {
+            let loc = String(i) + String(j + 1)
+            let locCell = document.getElementById(loc);
+            if (values[loc]) {
+                values[loc]++;
+                if (values[loc] > maxCapacity[loc]) {
+                    values[loc] = 0;
+                    occupiedCells--;
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = undefined;
+                    locCell.replaceChildren();
+                    increaseCount(i, j + 1)
+                } else {
+                    playerCells[cellOwner[loc]]--;
+                    cellOwner[loc] = players[turn];
+                    playerCells[cellOwner[loc]]++;
+                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
+                }
+            } else {
+                playerCells[players[turn]]++;
+                occupiedCells++;
+                values[loc] = 1
+                make1(locCell);
+            }
+        }
+    }
+
+    function make1(cell) {
+        cell.replaceChildren()
+        cellOwner[cell.id] = players[turn];
+        values[cell.id] = 1;
+        let newDiv = document.createElement("div");
+        newDiv.classList.add(players[turn] + "-circle");
+        cell.appendChild(newDiv);
+    }
+    function make2(cell) {
+        cell.replaceChildren()
+        let mainDiv = document.createElement("div");
+        mainDiv.classList.add("d-flex", "rotate");
+        let leftDiv = document.createElement("div");
+        let rightDiv = document.createElement("div");
+        leftDiv.classList.add(players[turn] + "-circle");
+        rightDiv.classList.add(players[turn] + "-circle");
+        mainDiv.appendChild(leftDiv);
+        mainDiv.appendChild(rightDiv)
+        cell.appendChild(mainDiv)
+    }
+    function make3(cell) {
+        cell.replaceChildren()
+        let mainDiv = document.createElement("div");
+        mainDiv.classList.add("d-flex", "flex-direction-column", "rotate", "j-c-c", "a-i-c", "m-a")
+        let upCircle = document.createElement("div");
+        upCircle.classList.add(players[turn] + "-circle")
+        let bottomDiv = document.createElement("div");
+        bottomDiv.classList.add("d-flex", "flex-direction-row", "h-100", "w-100")
+        let left = document.createElement("div");
+        left.classList.add(players[turn] + "-circle")
+        let right = document.createElement("div");
+        right.classList.add(players[turn] + "-circle")
+        bottomDiv.appendChild(left)
+        bottomDiv.appendChild(right)
+        mainDiv.appendChild(upCircle)
+        mainDiv.appendChild(bottomDiv)
+        cell.append(mainDiv)
+    }
+
+    function make4(cell) {
+        cell.replaceChildren()
+        let mainDiv = document.createElement("div");
+        mainDiv.classList.add("d-flex", "flex-direction-column", "rotate", "j-c-c", "a-i-c", "m-a")
+        let upDiv = document.createElement("div");
+        upDiv.classList.add("d-flex", "flex-direction-row", "h-100", "w-100")
+        let upLeft = document.createElement("div");
+        upLeft.classList.add(players[turn] + "-circle")
+        let upRight = document.createElement("div");
+        upRight.classList.add(players[turn] + "-circle")
+        upDiv.appendChild(upLeft)
+        upDiv.appendChild(upRight)
+        let bottomDiv = document.createElement("div");
+        bottomDiv.classList.add("d-flex", "flex-direction-row", "h-100", "w-100")
+        let downLeft = document.createElement("div");
+        downLeft.classList.add(players[turn] + "-circle")
+        let downRight = document.createElement("div");
+        downRight.classList.add(players[turn] + "-circle")
+        bottomDiv.appendChild(downLeft)
+        bottomDiv.appendChild(downRight)
+        mainDiv.appendChild(upDiv)
+        mainDiv.appendChild(bottomDiv)
+        cell.append(mainDiv)
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const grid = document.getElementById("grid");
+        for (let player of players) {
+            playerCells[player] = 0
+        }
+        let root = document.querySelector('body');
+        let rootStyles = getComputedStyle(root);
+        let lineColor = rootStyles.getPropertyValue('--grid-line-color');
+        for (let i = 0; i < rowsAndColumns; i++) {
+            for (let j = 0; j < rowsAndColumns; j++) {
+                let cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.id = String(i) + String(j)
+                maxCapacity[cell.id] = (i == 0 || i == 9 || j == 0 || j == 9) ? 2 : 3;
+                maxCapacity["00"] = 1
+                maxCapacity["09"] = 1
+                maxCapacity["90"] = 1
+                maxCapacity["99"] = 1
+                grid.appendChild(cell);
+                //cell.innerHTML = `<style>.styled-text {color: white;font-size: 16px;}</style><span class="styled-text">${maxCapacity[cell.id]}</span>`;
+                cell.addEventListener("click", function () {
+                    if (!gameOver && (!cellOwner[cell.id] || cellOwner[cell.id] == players[turn])) {
+                        if (values[cell.id]) {
+                            cell.replaceChildren();
+                            values[cell.id]++;
+                            if (values[cell.id] > maxCapacity[cell.id]) {
+                                values[cell.id] = 0
+                                playerCells[players[turn]]--;
+                                occupiedCells--;
+                                cellOwner[cell.id] = undefined;
+                                increaseCount(i, j)
+                            }
+                            else if (values[cell.id] == 2) {
+                                make2(cell)
+                            }
+                            else if (values[cell.id] == 3) {
+                                make3(cell)
+                            }
+                        }
+                        else {
+                            occupiedCells++;
+                            playerCells[players[turn]]++;
+                            make1(cell)
+                        }
+                        turn = Number(!turn);
+                        root.style.setProperty('--grid-line-color', players[turn]);
+                        if (occupiedCells > 2) {
+                            for (let player of players) {
+                                if (playerCells[player] == occupiedCells) {
+                                    gameOver = true;
+                                    document.getElementById("winner").innerHTML = player + " Wins!";
+                                    document.getElementById("go").style.zIndex = 10
+                                    document.getElementById("go").style.backgroundColor = player
+                                    const element = document.querySelector('#grid');
+                                    element.style.pointerEvents = 'none';
+                                }
+                            }
+                        }
+                    }
+                    console.log("currentCellOwner: ", cellOwner[cell.id]);
+                    console.log("currentPlayer: ", players[turn]);
+                    console.log("is Game Over: ", gameOver);
+                    console.log("occupiedCells: ", occupiedCells);
+                    console.log("greenCellCount: ", playerCells["green"]);
+                    console.log("redCellCount: ", playerCells["red"]);
+                })
+            }
+        }
+    });
+</script>
+<div id="grid">
+</div>
+<div class="game-over" id="go">
+    <h1>Game Over</h1>
+    <p id="winner"></p>
+    <button onclick="reset()" class="reset">Reset</button>
+</div>
