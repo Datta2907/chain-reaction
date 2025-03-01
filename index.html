@@ -322,8 +322,9 @@
                         turn = Number(!turn);
                         //change the grid line to the current players color
                         root.style.setProperty('--grid-line-color', players[turn]);
-                        //check game over only if there are more than 2 cells as each player might have 1 cell each
-                        if (occupiedCells > 2) {
+                        //check game over only if there is more than 1 cell
+                        //so that all players had their turn
+                        if (occupiedCells > 1) {
                             for (let player of players) {
                                 if (playerCells[player] == occupiedCells) {
                                     gameOver = true;
