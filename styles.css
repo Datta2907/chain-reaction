@@ -2,20 +2,29 @@ html,
 body {
     margin: 0;
     padding: 0;
-    height: 100%;
+    background: black;
+    --grid-line-color: red;
+    --rowsAndColumns: 5;
+}
+
+.home {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: black;
-    --grid-line-color: red;
+}
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #grid {
     display: grid;
     width: 95vw;
-    height: 95vh;
-    grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: repeat(10, 1fr);
+    height: 85vh;
+    grid-template-columns: repeat(var(--rowsAndColumns), 1fr);
+    grid-template-rows: repeat(var(--rowsAndColumns), 1fr);
 }
 
 #winner {
@@ -24,6 +33,10 @@ body {
 
 #grid:hover {
     cursor: pointer;
+}
+
+.header {
+    color: white;
 }
 
 .d-flex {

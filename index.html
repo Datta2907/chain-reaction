@@ -17,11 +17,6 @@
     let values = {}//check the count in each cell
     let cellOwner = {}//keep track of the owner of cell
     let maxCapacity = {}//max capacity of each cell
-    //Edge case for corner cells to have 2
-    maxCapacity["00"] = 2
-    maxCapacity["09"] = 2
-    maxCapacity["90"] = 2
-    maxCapacity["99"] = 2
     //reset function
     function reset() {
         window.location.reload();
@@ -263,6 +258,9 @@
         let rootStyles = getComputedStyle(root);
         //set the grid line color to red by default
         let lineColor = rootStyles.getPropertyValue('--grid-line-color');
+        rowsAndColumns = rootStyles.getPropertyValue('--rowsAndColumns');
+        let lastButOne = rowsAndColumns - 1;
+        let lastStr = String(lastButOne);
         //for each row and column
         for (let i = 0; i < rowsAndColumns; i++) {
             for (let j = 0; j < rowsAndColumns; j++) {
@@ -272,11 +270,12 @@
                 //create an id and assign to the cell
                 cell.id = String(i) + String(j)
                 //give the max capacity to the cell
-                maxCapacity[cell.id] = (i == 0 || i == 9 || j == 0 || j == 9) ? 2 : 3;
+                maxCapacity[cell.id] = (i == 0 || i == lastButOne || j == 0 || j == lastButOne) ? 2 : 3;
+                //Edge case for corner cells to have 2
                 maxCapacity["00"] = 1
-                maxCapacity["09"] = 1
-                maxCapacity["90"] = 1
-                maxCapacity["99"] = 1
+                maxCapacity["0" + lastStr] = 1
+                maxCapacity[lastStr + "0"] = 1
+                maxCapacity[lastStr + lastStr] = 1
                 grid.appendChild(cell);
                 //cell.innerHTML = `<style>.styled-text {color: white;font-size: 16px;}</style><span class="styled-text">${maxCapacity[cell.id]}</span>`;
                 //function when cell is clicked
@@ -350,11 +349,16 @@
     });
 </script>
 <!--grid div-->
-<div id="grid">
-</div>
-<!--displays when game is over-->
-<div class="game-over" id="go">
-    <h1>Game Over</h1>
-    <p id="winner"></p>
-    <button onclick="reset()" class="reset">Reset</button>
+<div class="home">
+    <div class="layout">
+        <h1 class="header">Chain Reaction</h1>
+        <div id="grid">
+        </div>
+    </div>
+    <!--displays when game is over-->
+    <div class="game-over" id="go">
+        <h1>Game Over</h1>
+        <p id="winner"></p>
+        <button onclick="reset()" class="reset">Reset</button>
+    </div>
 </div>
