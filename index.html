@@ -19,234 +19,140 @@
     let maxCapacity = {}//max capacity of each cell
     //reset function
     function reset() {
-        window.location.reload();
+        for (let player of players) {
+            playerCells[player] = 0
+        }
+        gameOver = false;
+        turn = 0
+        occupiedCells = 0
+        values = {}
+        cellOwner = {}
+        document.querySelectorAll('#grid > *').forEach(cell => {
+            cell.replaceChildren(); // Removes all child elements inside each cell
+        });
+        //set styles for the game over div
+        document.getElementById("winner").innerHTML = "";
+        document.getElementById("go").style.zIndex = -10
+        document.getElementById("go").style.backgroundColor = "black"
+        const element = document.querySelector('#grid');
+        element.style.pointerEvents = '';
+        let root = document.querySelector('body');
+        root.style.setProperty('--grid-line-color', players[turn]);
     }
 
     //increase count for other cells when a current cell bursts
-    function increaseCount(i, j) {
-        //check if up cell is in bound
-        if (i - 1 > -1) {
-            //convert the loc to string and access the cell property using id
-            let loc = String(i - 1) + String(j)
+    function increaseCount(i, j, visited = new Set()) {
+        const processCell = (x, y) => {
+            //boundary check
+            if (x < 0 || y < 0 || x >= rowsAndColumns || y >= rowsAndColumns) return;
+            let loc = String(x) + String(y);
+            //prevents infinite recursion on the same cell
+            if (visited.has(loc)) return;
+            //mark the cell as visited
+            visited.add(loc);
             let locCell = document.getElementById(loc);
-            //if it has values
+            //prevent accessing non-existing elements
+            if (!locCell) return;
             if (values[loc]) {
-                //increase the count and check if it crossed the max capacity
                 values[loc]++;
                 if (values[loc] > maxCapacity[loc]) {
-                    //reset the value to 0
+                    //overflowing condition
                     values[loc] = 0;
-                    //as the current cell gets empty decrease the occupied count
                     occupiedCells--;
-                    //decrease the previous cell count
                     playerCells[cellOwner[loc]]--;
-                    //declare it as undefined as the owner is nobody now
                     cellOwner[loc] = undefined;
-                    //empty the cell content
                     locCell.replaceChildren();
-                    //use recursion to see what other cells values will be
-                    increaseCount(i - 1, j)
-                } else {
-                    //if it less than max capacity
-                    //decrease that players ownership count
-                    playerCells[cellOwner[loc]]--;
-                    //update the cell owner
-                    cellOwner[loc] = players[turn];
-                    //increase that players ownership count
-                    playerCells[cellOwner[loc]]++;
-                    //change the inner cell value according to the new value
-                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
-                }
-            } else {
-                //if no value set it to 1, increase players count and occupied cells
-                playerCells[players[turn]]++;
-                occupiedCells++;
-                values[loc] = 1
-                make1(locCell);
-            }
-        }
-        //check if down cell is in bound
-        if (i + 1 < rowsAndColumns) {
-            //convert the loc to string and access the cell property using id
-            let loc = String(i + 1) + String(j)
-            let locCell = document.getElementById(loc);
-            //if it has values
-            if (values[loc]) {
-                //increase the count and check if it crossed the max capacity
-                values[loc]++;
-                if (values[loc] > maxCapacity[loc]) {
-                    //reset the value to 0
-                    values[loc] = 0;
-                    //as the current cell gets empty decrease the occupied count
-                    occupiedCells--;
-                    //decrease the previous cell count
-                    playerCells[cellOwner[loc]]--;
-                    //declare it as undefined as the owner is nobody now
-                    cellOwner[loc] = undefined;
-                    //empty the cell content
-                    locCell.replaceChildren();
-                    //use recursion to see what other cells values will be
-                    increaseCount(i + 1, j)
+                    //recursive calls for the neighbors
+                    //up
+                    processCell(x - 1, y);
+                    //down
+                    processCell(x + 1, y);
+                    //left
+                    processCell(x, y - 1);
+                    //right
+                    processCell(x, y + 1);
                 } else {
                     playerCells[cellOwner[loc]]--;
                     cellOwner[loc] = players[turn];
                     playerCells[cellOwner[loc]]++;
-                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
+                    //update the inner element of the div 
+                    values[loc] === 1 ? make1(locCell, players[turn]) : values[loc] === 2 ? make2(locCell, players[turn]) : make3(locCell, players[turn]);
                 }
             } else {
-                //if no value set it to 1, increase players count and occupied cells
-                playerCells[players[turn]]++;
-                occupiedCells++;
+                //cell was empty
                 values[loc] = 1;
-                make1(locCell);
-            }
-        }
-        //check if left cell is in bound
-        if (j - 1 > -1) {
-            //convert the loc to string and access the cell property using id
-            let loc = String(i) + String(j - 1)
-            let locCell = document.getElementById(loc);
-            //if it has values
-            if (values[loc]) {
-                //increase the count and check if it crossed the max capacity
-                values[loc]++;
-                if (values[loc] > maxCapacity[loc]) {
-                    //reset the value to 0
-                    values[loc] = 0;
-                    //as the current cell gets empty decrease the occupied count
-                    occupiedCells--;
-                    //decrease the previous cell count
-                    playerCells[cellOwner[loc]]--;
-                    //declare it as undefined as the owner is nobody now
-                    cellOwner[loc] = undefined;
-                    //empty the cell content
-                    locCell.replaceChildren();
-                    //use recursion to see what other cells values will be
-                    increaseCount(i, j - 1)
-                } else {
-                    playerCells[cellOwner[loc]]--;
-                    cellOwner[loc] = players[turn];
-                    playerCells[cellOwner[loc]]++;
-                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
-                }
-            } else {
-                //if no value set it to 1, increase players count and occupied cells
+                cellOwner[loc] = players[turn];
                 playerCells[players[turn]]++;
                 occupiedCells++;
-                values[loc] = 1;
-                make1(locCell);
+                make1(locCell, players[turn]);
             }
-        }
-        //check if right cell is in bound
-        if (j + 1 < rowsAndColumns) {
-            //convert the loc to string and access the cell property using id
-            let loc = String(i) + String(j + 1)
-            let locCell = document.getElementById(loc);
-            //if it has values
-            if (values[loc]) {
-                //increase the count and check if it crossed the max capacity
-                values[loc]++;
-                if (values[loc] > maxCapacity[loc]) {
-                    //reset the value to 0
-                    values[loc] = 0;
-                    //as the current cell gets empty decrease the occupied count
-                    occupiedCells--;
-                    //decrease the previous cell count
-                    playerCells[cellOwner[loc]]--;
-                    //declare it as undefined as the owner is nobody now
-                    cellOwner[loc] = undefined;
-                    //empty the cell content
-                    locCell.replaceChildren();
-                    //use recursion to see what other cells values will be
-                    increaseCount(i, j + 1)
-                } else {
-                    playerCells[cellOwner[loc]]--;
-                    cellOwner[loc] = players[turn];
-                    playerCells[cellOwner[loc]]++;
-                    values[loc] == 1 ? make1(locCell) : values[loc] == 2 ? make2(locCell) : make3(locCell);
-                }
-            } else {
-                //if no value set it to 1, increase players count and occupied cells
-                playerCells[players[turn]]++;
-                occupiedCells++;
-                values[loc] = 1
-                make1(locCell);
-            }
-        }
+        };
+        //start recursion with tracking
+        //up
+        processCell(i - 1, j);
+        //down
+        processCell(i + 1, j);
+        //left
+        processCell(i, j - 1);
+        //right
+        processCell(i, j + 1);
     }
-
+    //replace the cell inner content with latest information
+    //remove everythign from the cell
+    function make0(cell, cellColor) {
+        cell.replaceChildren()
+    }
     //replace the cell inner content with latest information
     //update the cell value and add the new ui
-    function make1(cell) {
+    function make1(cell, cellColor) {
         cell.replaceChildren()
-        cellOwner[cell.id] = players[turn];
-        values[cell.id] = 1;
         let newDiv = document.createElement("div");
-        newDiv.classList.add(players[turn] + "-circle");
+        newDiv.classList.add(cellColor + "-circle");
         cell.appendChild(newDiv);
     }
     //replace the cell inner content with latest information
     //update the cell value and add the new ui with animation
-    function make2(cell) {
+    function make2(cell, cellColor) {
         cell.replaceChildren()
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("d-flex", "rotate");
         let leftDiv = document.createElement("div");
         let rightDiv = document.createElement("div");
-        leftDiv.classList.add(players[turn] + "-circle");
-        rightDiv.classList.add(players[turn] + "-circle");
+        leftDiv.classList.add(cellColor + "-circle");
+        rightDiv.classList.add(cellColor + "-circle");
         mainDiv.appendChild(leftDiv);
         mainDiv.appendChild(rightDiv)
         cell.appendChild(mainDiv)
     }
     //replace the cell inner content with latest information
     //update the cell value and add the new ui with animation
-    function make3(cell) {
+    function make3(cell, cellColor) {
         cell.replaceChildren()
         let mainDiv = document.createElement("div");
         mainDiv.classList.add("d-flex", "flex-direction-column", "rotate", "j-c-c", "a-i-c", "m-a")
         let upCircle = document.createElement("div");
-        upCircle.classList.add(players[turn] + "-circle")
+        upCircle.classList.add(cellColor + "-circle")
         let bottomDiv = document.createElement("div");
         bottomDiv.classList.add("d-flex", "flex-direction-row", "h-100", "w-100")
         let left = document.createElement("div");
-        left.classList.add(players[turn] + "-circle")
+        left.classList.add(cellColor + "-circle")
         let right = document.createElement("div");
-        right.classList.add(players[turn] + "-circle")
+        right.classList.add(cellColor + "-circle")
         bottomDiv.appendChild(left)
         bottomDiv.appendChild(right)
         mainDiv.appendChild(upCircle)
         mainDiv.appendChild(bottomDiv)
         cell.append(mainDiv)
     }
-    //not needed now
-    //replace the cell inner content with latest information
-    //update the cell value and add the new ui with animation
-    function make4(cell) {
-        cell.replaceChildren()
-        let mainDiv = document.createElement("div");
-        mainDiv.classList.add("d-flex", "flex-direction-column", "rotate", "j-c-c", "a-i-c", "m-a")
-        let upDiv = document.createElement("div");
-        upDiv.classList.add("d-flex", "flex-direction-row", "h-100", "w-100")
-        let upLeft = document.createElement("div");
-        upLeft.classList.add(players[turn] + "-circle")
-        let upRight = document.createElement("div");
-        upRight.classList.add(players[turn] + "-circle")
-        upDiv.appendChild(upLeft)
-        upDiv.appendChild(upRight)
-        let bottomDiv = document.createElement("div");
-        bottomDiv.classList.add("d-flex", "flex-direction-row", "h-100", "w-100")
-        let downLeft = document.createElement("div");
-        downLeft.classList.add(players[turn] + "-circle")
-        let downRight = document.createElement("div");
-        downRight.classList.add(players[turn] + "-circle")
-        bottomDiv.appendChild(downLeft)
-        bottomDiv.appendChild(downRight)
-        mainDiv.appendChild(upDiv)
-        mainDiv.appendChild(bottomDiv)
-        cell.append(mainDiv)
-    }
 
+    function GameOver(winner) {
+        //set styles for the game over div
+        document.getElementById("winner").innerHTML = winner + " Wins!";
+        document.getElementById("go").style.zIndex = 10
+        document.getElementById("go").style.backgroundColor = winner
+        const element = document.querySelector('#grid');
+        element.style.pointerEvents = 'none';
+    }
     //set grid layout when DOM content has loaded
     document.addEventListener("DOMContentLoaded", () => {
         const grid = document.getElementById("grid");
@@ -303,11 +209,11 @@
                             }
                             else if (values[cell.id] == 2) {
                                 //update the divs inner content
-                                make2(cell)
+                                make2(cell, players[turn])
                             }
                             else if (values[cell.id] == 3) {
                                 //update the divs inner content
-                                make3(cell)
+                                make3(cell, players[turn])
                             }
                         }
                         else {
@@ -315,7 +221,9 @@
                             //increase the occupied cell count and the current players cell count
                             occupiedCells++;
                             playerCells[players[turn]]++;
-                            make1(cell)
+                            values[cell.id] = 1
+                            cellOwner[cell.id] = players[turn];
+                            make1(cell, players[turn])
                         }
                         //update the turn
                         turn = Number(!turn);
@@ -327,22 +235,11 @@
                             for (let player of players) {
                                 if (playerCells[player] == occupiedCells) {
                                     gameOver = true;
-                                    //set styles for the game over div
-                                    document.getElementById("winner").innerHTML = player + " Wins!";
-                                    document.getElementById("go").style.zIndex = 10
-                                    document.getElementById("go").style.backgroundColor = player
-                                    const element = document.querySelector('#grid');
-                                    element.style.pointerEvents = 'none';
+                                    GameOver(player)
                                 }
                             }
                         }
                     }
-                    // console.log("currentCellOwner: ", cellOwner[cell.id]);
-                    // console.log("currentPlayer: ", players[turn]);
-                    // console.log("is Game Over: ", gameOver);
-                    // console.log("occupiedCells: ", occupiedCells);
-                    // console.log("greenCellCount: ", playerCells["green"]);
-                    // console.log("redCellCount: ", playerCells["red"]);
                 })
             }
         }
