@@ -36,5 +36,5 @@ Installation & Running
 This game runs in a web browser. To play locally:
 1. Clone the repository: git clone https://github.com/yourusername/chain-reaction.git
 2. Open index.html in a web browser.
-3. Enjoy the game!
+3. Enjoy the game here - https://datta2907.github.io/chain-reaction/
 
